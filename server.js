@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const dotenv = require('dotenv');
@@ -31,19 +30,13 @@ app.use(mongoSanitize());
 // Prevent HTTP parameter pollution
 app.use(hpp());
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again after 15 minutes'
-});
-app.use('/api', limiter);
-
 // CORS Configuration
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : 'http://localhost:3000',
+    origin: [
+        "https://nexlyndistribution.com",
+        "https://www.nexlyndistribution.com",
+        "http://localhost:3000"
+    ],
     credentials: true
 }));
 

@@ -19,7 +19,7 @@ const getAllProducts = async (req, res) => {
         const total = await Product.countDocuments();
 
         // Add caching headers for public data (1 hour)
-        res.set('Cache-Control', 'public, max-age=3600');
+        // res.set('Cache-Control', 'public, max-age=3600');
 
         res.status(200).json({
             products,
