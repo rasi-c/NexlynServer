@@ -21,8 +21,8 @@ app.set('trust proxy', 1);
 app.use(helmet());
 
 // Limit request size
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
