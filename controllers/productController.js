@@ -73,7 +73,9 @@ const createProduct = async (req, res) => {
             keyFeatures,
             specifications,
             useCases,
-            inStock
+            inStock,
+            youtubeLink,
+            pdfLink
         } = req.body;
 
         // Extract image URLs from req.files (uploaded via Cloudinary storage)
@@ -95,7 +97,9 @@ const createProduct = async (req, res) => {
             keyFeatures: parsedKeyFeatures,
             specifications: specifications || '',
             useCases: useCases || '',
-            inStock: inStock === 'false' ? false : true
+            inStock: inStock === 'false' ? false : true,
+            youtubeLink: youtubeLink || '',
+            pdfLink: pdfLink || ''
         });
 
         res.status(201).json(product);
@@ -125,7 +129,9 @@ const updateProduct = async (req, res) => {
             specifications,
             useCases,
             inStock,
-            existingImages
+            existingImages,
+            youtubeLink,
+            pdfLink
         } = req.body;
 
         // Handle images: Start with existing images that should be kept
@@ -162,6 +168,8 @@ const updateProduct = async (req, res) => {
         if (price !== undefined) product.price = price;
         if (category !== undefined) product.category = category;
         if (inStock !== undefined) product.inStock = inStock === 'true' || inStock === true;
+        if (youtubeLink !== undefined) product.youtubeLink = youtubeLink;
+        if (pdfLink !== undefined) product.pdfLink = pdfLink;
 
         const updatedProduct = await product.save();
         res.status(200).json(updatedProduct);

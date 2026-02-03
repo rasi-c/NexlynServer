@@ -44,6 +44,14 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    youtubeLink: {
+        type: String,
+        default: ''
+    },
+    pdfLink: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now
