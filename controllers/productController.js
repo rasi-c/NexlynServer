@@ -64,30 +64,37 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
     try {
-        const { name, description, price, category, keyFeatures, specifications, inStock } = req.body;
+        const {
+            name,
+            description,
+            detailedDescription,
+            price,
+            category,
+            keyFeatures,
+            specifications,
+            useCases,
+            inStock
+        } = req.body;
 
         // Extract image URLs from req.files (uploaded via Cloudinary storage)
         const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
-        // Parse keyFeatures and specifications if they are strings (JSON)
+        // Parse keyFeatures if it's a string (JSON)
         let parsedKeyFeatures = keyFeatures;
-        let parsedSpecifications = specifications;
-
         if (typeof keyFeatures === 'string') {
             try { parsedKeyFeatures = JSON.parse(keyFeatures); } catch (e) { parsedKeyFeatures = []; }
-        }
-        if (typeof specifications === 'string') {
-            try { parsedSpecifications = JSON.parse(specifications); } catch (e) { parsedSpecifications = []; }
         }
 
         const product = await Product.create({
             name,
             description,
+            detailedDescription: detailedDescription || '',
             price,
             category,
             images: imageUrls,
             keyFeatures: parsedKeyFeatures,
-            specifications: parsedSpecifications,
+            specifications: specifications || '',
+            useCases: useCases || '',
             inStock: inStock === 'false' ? false : true
         });
 
@@ -108,28 +115,53 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        const { name, description, price, category, keyFeatures, specifications, inStock } = req.body;
+        const {
+            name,
+            description,
+            detailedDescription,
+            price,
+            category,
+            keyFeatures,
+            specifications,
+            useCases,
+            inStock,
+            existingImages
+        } = req.body;
 
-        // If new images are uploaded, add them to existing ones or replace them
-        // For this implementation, we will append new images if provided
-        if (req.files && req.files.length > 0) {
-            const newImageUrls = req.files.map(file => file.path);
-            product.images = [...product.images, ...newImageUrls];
+        // Handle images: Start with existing images that should be kept
+        let finalImages = [];
+        if (existingImages) {
+            try {
+                finalImages = typeof existingImages === 'string' ? JSON.parse(existingImages) : existingImages;
+            } catch (e) {
+                finalImages = product.images; // Fallback to current images
+            }
+        } else {
+            finalImages = product.images;
         }
 
-        // Parse keyFeatures and specifications if they are strings
+        // Add new uploaded images
+        if (req.files && req.files.length > 0) {
+            const newImageUrls = req.files.map(file => file.path);
+            finalImages = [...finalImages, ...newImageUrls];
+        }
+
+        product.images = finalImages;
+
+        // Parse keyFeatures if it's a string
         if (keyFeatures) {
             product.keyFeatures = typeof keyFeatures === 'string' ? JSON.parse(keyFeatures) : keyFeatures;
         }
-        if (specifications) {
-            product.specifications = typeof specifications === 'string' ? JSON.parse(specifications) : specifications;
-        }
 
-        product.name = name || product.name;
-        product.description = description || product.description;
-        product.price = price || product.price;
-        product.category = category || product.category;
-        product.inStock = inStock !== undefined ? inStock : product.inStock;
+        // Update all fields
+        if (name !== undefined) product.name = name;
+        if (description !== undefined) product.description = description;
+        if (detailedDescription !== undefined) product.detailedDescription = detailedDescription;
+        if (specifications !== undefined) product.specifications = specifications;
+        if (useCases !== undefined) product.useCases = useCases;
+        if (price !== undefined) product.price = price;
+        if (category !== undefined) product.category = category;
+        if (inStock !== undefined) product.inStock = inStock === 'true' || inStock === true;
 
         const updatedProduct = await product.save();
         res.status(200).json(updatedProduct);

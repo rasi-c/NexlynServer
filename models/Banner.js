@@ -9,9 +9,17 @@ const bannerSchema = new mongoose.Schema({
         type: String, // Cloudinary URL
         required: [true, 'Banner image is required']
     },
+    backgroundImage: {
+        type: String, // Cloudinary URL
+        default: ''
+    },
     link: {
         type: String,
         default: ''
+    },
+    order: {
+        type: Number,
+        default: 0
     },
     active: {
         type: Boolean,

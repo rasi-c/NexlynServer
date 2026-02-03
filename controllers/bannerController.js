@@ -17,8 +17,11 @@ const getAllBanners = async (req, res) => {
 // @access  Private/Admin
 const createBanner = async (req, res) => {
     try {
-        const { title, link, active } = req.body;
-        const image = req.file ? req.file.path : '';
+        const { title, link, active, order } = req.body;
+
+        const files = req.files || {};
+        const image = files['image'] ? files['image'][0].path : '';
+        const backgroundImage = files['backgroundImage'] ? files['backgroundImage'][0].path : '';
 
         if (!image) {
             return res.status(400).json({ message: 'Banner image is required' });
@@ -27,7 +30,9 @@ const createBanner = async (req, res) => {
         const banner = await Banner.create({
             title,
             image,
+            backgroundImage,
             link,
+            order: order ? parseInt(order) : 0,
             active: active === 'false' ? false : true
         });
 
@@ -47,17 +52,23 @@ const updateBanner = async (req, res) => {
             return res.status(404).json({ message: 'Banner not found' });
         }
 
-        const { title, link, order, isActive } = req.body;
+        const { title, link, order, active } = req.body;
 
         // Update fields
-        banner.title = title !== undefined ? title : banner.title;
-        banner.link = link !== undefined ? link : banner.link;
-        banner.order = order !== undefined ? order : banner.order;
-        banner.isActive = isActive !== undefined ? isActive : banner.isActive;
+        if (title !== undefined) banner.title = title;
+        if (link !== undefined) banner.link = link;
+        if (order !== undefined) banner.order = parseInt(order);
+        if (active !== undefined) {
+            banner.active = active === 'true' || active === true;
+        }
 
-        // Update image if new one is provided
-        if (req.file) {
-            banner.image = req.file.path;
+        // Update images if provided
+        const files = req.files || {};
+        if (files['image']) {
+            banner.image = files['image'][0].path;
+        }
+        if (files['backgroundImage']) {
+            banner.backgroundImage = files['backgroundImage'][0].path;
         }
 
         const updatedBanner = await banner.save();

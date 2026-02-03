@@ -10,6 +10,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Product description is required']
     },
+    detailedDescription: {
+        type: String,
+        default: ''
+    },
     price: {
         type: Number,
         required: [true, 'Product price is required'],
@@ -23,12 +27,14 @@ const productSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-    specifications: [
-        {
-            label: { type: String, required: true },
-            value: { type: String, required: true }
-        }
-    ],
+    specifications: {
+        type: String,
+        default: ''
+    },
+    useCases: {
+        type: String,
+        default: ''
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
