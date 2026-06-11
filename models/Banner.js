@@ -13,6 +13,10 @@ const bannerSchema = new mongoose.Schema({
         type: String, // Cloudinary URL
         default: ''
     },
+    videoUrl: {
+        type: String, // Cloudinary URL
+        default: ''
+    },
     link: {
         type: String,
         default: ''

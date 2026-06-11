@@ -10,12 +10,16 @@ cloudinary.config({
 });
 
 // Configure Multer Storage for Cloudinary
+// NOTE: params must be an async function in multer-storage-cloudinary v4
+// to correctly set resource_type per file (videos need 'video', not 'image')
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'ecommerce',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-        // transformation: [{ width: 1000, height: 1000, crop: 'limit' }] // Optional: limit size
+    params: async (req, file) => {
+        const isVideo = file.mimetype.startsWith('video/');
+        return {
+            folder: 'ecommerce',
+            resource_type: isVideo ? 'video' : 'image',
+        };
     }
 });
 
@@ -23,16 +27,19 @@ const storage = new CloudinaryStorage({
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: 50 * 1024 * 1024 // 50MB limit for videos
     },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|webp/;
+        // Log the file for debugging if needed (will show in server console)
+        console.log('Uploading file:', file.originalname, 'Mime:', file.mimetype);
+
+        const allowedTypes = /image\/(jpeg|jpg|png|webp)|video\/(mp4|quicktime|webm|x-matroska|mpeg|ogg)/;
         const isMimeValid = allowedTypes.test(file.mimetype);
 
         if (isMimeValid) {
             cb(null, true);
         } else {
-            cb(new Error('Only images (JPG, JPEG, PNG, WEBP) are allowed'), false);
+            cb(new Error(`File type "${file.mimetype}" is not supported. Use JPG, PNG, WEBP for images and MP4, MOV, WEBM for videos.`), false);
         }
     }
 });
