@@ -27,7 +27,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 50 * 1024 * 1024 // 50MB limit for videos
+        fileSize: 50 * 1024 * 1024 // 50MB limit for videos !
     },
     fileFilter: (req, file, cb) => {
         // Log the file for debugging if needed (will show in server console)

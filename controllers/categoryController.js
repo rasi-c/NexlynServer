@@ -40,7 +40,7 @@ const getCategoryById = async (req, res) => {
 // @access  Private/Admin
 const createCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, showInHome } = req.body;
 
         const slug = generateSlug(name);
 
@@ -56,7 +56,8 @@ const createCategory = async (req, res) => {
             name,
             slug,
             description,
-            image
+            image,
+            showInHome: showInHome === 'true' || showInHome === true
         });
 
         res.status(201).json(category);
@@ -76,15 +77,19 @@ const updateCategory = async (req, res) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        const { name, description } = req.body;
+        const { name, description, showInHome } = req.body;
 
         if (name) {
             category.name = name;
             category.slug = generateSlug(name);
         }
 
-        if (description) {
+        if (description !== undefined) {
             category.description = description;
+        }
+
+        if (showInHome !== undefined) {
+            category.showInHome = showInHome === 'true' || showInHome === true;
         }
 
         if (req.file) {
