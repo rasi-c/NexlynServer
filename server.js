@@ -35,7 +35,7 @@ app.use(cors({
     origin: [
         "https://nexlyndistribution.com",
         "https://www.nexlyndistribution.com",
-        "http://localhost:3000"
+        "http://localhost:3001"
     ],
     credentials: true
 }));
