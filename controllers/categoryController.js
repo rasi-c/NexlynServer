@@ -4,6 +4,7 @@ const Category = require('../models/Category');
 const generateSlug = (name) => {
     return name
         .toLowerCase()
+        .replace(/\+/g, 'plus')
         .replace(/[^\w ]+/g, '')
         .replace(/ +/g, '-');
 };

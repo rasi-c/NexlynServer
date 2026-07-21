@@ -49,7 +49,16 @@ const getProductsByCategory = async (req, res) => {
 // @access  Public
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category', 'name slug');
+        const idOrSlug = req.params.id;
+        const isObjectId = idOrSlug.match(/^[0-9a-fA-F]{24}$/);
+        
+        let product;
+        if (isObjectId) {
+            product = await Product.findById(idOrSlug).populate('category', 'name slug');
+        } else {
+            product = await Product.findOne({ slug: idOrSlug }).populate('category', 'name slug');
+        }
+
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -66,6 +75,7 @@ const createProduct = async (req, res) => {
     try {
         const {
             name,
+            slug,
             description,
             detailedDescription,
             price,
@@ -87,8 +97,14 @@ const createProduct = async (req, res) => {
             try { parsedKeyFeatures = JSON.parse(keyFeatures); } catch (e) { parsedKeyFeatures = []; }
         }
 
+        let sanitizedSlug = undefined;
+        if (slug && slug.trim()) {
+            sanitizedSlug = slug.trim().toLowerCase().replace(/\+/g, 'plus').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        }
+
         const product = await Product.create({
             name,
+            slug: sanitizedSlug,
             description,
             detailedDescription: detailedDescription || '',
             price,
@@ -121,6 +137,7 @@ const updateProduct = async (req, res) => {
 
         const {
             name,
+            slug,
             description,
             detailedDescription,
             price,
@@ -161,6 +178,13 @@ const updateProduct = async (req, res) => {
 
         // Update all fields
         if (name !== undefined) product.name = name;
+        if (slug !== undefined) {
+            if (slug && slug.trim()) {
+                product.slug = slug.trim().toLowerCase().replace(/\+/g, 'plus').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            } else {
+                product.slug = undefined;
+            }
+        }
         if (description !== undefined) product.description = description;
         if (detailedDescription !== undefined) product.detailedDescription = detailedDescription;
         if (specifications !== undefined) product.specifications = specifications;
